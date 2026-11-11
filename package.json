@@ -1,0 +1,29 @@
+{
+  "name": "printpoint-centre",
+  "version": "1.0.0",
+  "description": "PrintPoint Centre backend for 3D printer reservation management",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "init-db": "node src/config/initDb.js",
+    "test": "node --test test/**/*.test.js"
+  },
+  "keywords": [
+    "express",
+    "sqlite",
+    "backend",
+    "3d-printers",
+    "api"
+  ],
+  "author": "PrintPoint Centre",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0"
+  }
+}

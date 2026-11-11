@@ -1,0 +1,438 @@
+{
+  "info": {
+    "name": "PrintPoint Centre API",
+    "description": "Backend collection for the PrintPoint Centre assignment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Basic API Tests",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health"
+            }
+          },
+          "response": [
+            {
+              "name": "Health response",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "http://localhost:3000/health",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "3000",
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"PrintPoint Centre backend is running\",\n  \"timestamp\": \"2026-11-10T15:30:00.000Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\n  pm.response.to.have.status(200);\n});",
+                  "pm.test(\"Response has success field\", function () {\n  const body = pm.response.json();\n  pm.expect(body.success).to.eql(true);\n});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get all designers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/designers"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Has array data\", function () { const body = pm.response.json(); pm.expect(body.data).to.be.an(\"array\"); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add designer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sofia Ahmed\",\n  \"email\": \"sofia.ahmed@printpoint.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/designers"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Designer created\", function () { const body = pm.response.json(); pm.expect(body.data.name).to.eql(\"Sofia Ahmed\"); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get all printers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/printers"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Returns printers array\", function () { const body = pm.response.json(); pm.expect(body.data).to.be.an(\"array\"); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get printer by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/printers/{{seededPrinterId}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Returns the seeded printer\", function () { const body = pm.response.json(); pm.expect(body.data.id).to.eql(Number(pm.collectionVariables.get(\"seededPrinterId\"))); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search printers by material",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/printers?material=PLA"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Search has data\", function () { const body = pm.response.json(); pm.expect(body.data).to.be.an(\"array\"); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Printer CRUD Workflow",
+      "item": [
+        {
+          "name": "Add printer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Printer\",\n  \"material\": \"PLA\",\n  \"status\": \"available\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/printers"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.unset(\"printerId\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Printer is created and its actual ID is saved\", function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.eql(true);",
+                  "  pm.expect(body.data.name).to.eql(\"Postman Test Printer\");",
+                  "  pm.expect(body.data.id).to.be.a(\"number\");",
+                  "  pm.collectionVariables.set(\"printerId\", String(body.data.id));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update printer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Printer Updated\",\n  \"material\": \"PETG\",\n  \"status\": \"printing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/printers/{{printerId}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"The stored printer is updated\", function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.eql(true);",
+                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get(\"printerId\"));",
+                  "  pm.expect(body.data.name).to.eql(\"Postman Test Printer Updated\");",
+                  "  pm.expect(body.data.material).to.eql(\"PETG\");",
+                  "  pm.expect(body.data.status).to.eql(\"printing\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get audit logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/audit"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Latest 10 audit records include this printer's UPDATE then ADD\", function () {",
+                  "  const body = pm.response.json();",
+                  "  const printerId = Number(pm.collectionVariables.get(\"printerId\"));",
+                  "  pm.expect(Number.isInteger(printerId)).to.eql(true);",
+                  "  pm.expect(body.success).to.eql(true);",
+                  "  pm.expect(body.data).to.be.an(\"array\");",
+                  "  pm.expect(body.count).to.eql(body.data.length);",
+                  "  pm.expect(body.data.length).to.be.at.most(10);",
+                  "  const printerAudits = body.data.filter((record) => record.printer_id === printerId);",
+                  "  pm.expect(printerAudits.map((record) => record.action)).to.eql([\"UPDATE\", \"ADD\"]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete printer",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/printers/{{printerId}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"The stored printer is deleted\", function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.eql(true);",
+                  "  pm.expect(String(body.data.id)).to.eql(pm.collectionVariables.get(\"printerId\"));",
+                  "  pm.expect(body.message).to.eql(\"Printer deleted successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /audit - Verify DELETE",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/audit"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Latest 10 audit records preserve ADD, UPDATE, and newest DELETE\", function () {",
+                  "  const body = pm.response.json();",
+                  "  const printerId = Number(pm.collectionVariables.get(\"printerId\"));",
+                  "  pm.expect(Number.isInteger(printerId)).to.eql(true);",
+                  "  pm.expect(body.success).to.eql(true);",
+                  "  pm.expect(body.data).to.be.an(\"array\");",
+                  "  pm.expect(body.count).to.eql(body.data.length);",
+                  "  pm.expect(body.data.length).to.be.at.most(10);",
+                  "  const printerAudits = body.data.filter((record) => record.printer_id === printerId);",
+                  "  pm.expect(printerAudits.map((record) => record.action)).to.eql([\"DELETE\", \"UPDATE\", \"ADD\"]);",
+                  "  pm.expect(printerAudits[0].action).to.eql(\"DELETE\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reservation and JOIN Tests",
+      "item": [
+        {
+          "name": "Get reservations with JOIN",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reservations"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Includes names\", function () { const body = pm.response.json(); pm.expect(body.data[0].designer_name).to.be.a(\"string\"); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designer_id\": {{designerId}},\n  \"printer_id\": {{seededPrinterId}},\n  \"reservation_date\": \"2026-11-15\",\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservations"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Reservation created\", function () { const body = pm.response.json(); pm.expect(body.data.designer_id).to.eql(1); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "printerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "seededPrinterId",
+      "value": "101",
+      "type": "string"
+    },
+    {
+      "key": "designerId",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}
